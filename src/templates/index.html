@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - FitTracker IoT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Hero Section -->
+        <div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-heart-pulse" style="font-size: 5rem; margin-bottom: 1rem;"></i>
+                <h1 class="display-4 fw-bold mb-3">FitTracker IoT</h1>
+                <p class="lead mb-4">
+                    Sistema de monitoreo de actividad física en tiempo real con ESP32
+                </p>
+                <a href="/dashboard" class="btn btn-light btn-lg">
+                    <i class="bi bi-activity"></i> Ver Mi Actividad
+                </a>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-heart-pulse-fill text-danger" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3">Frecuencia Cardíaca</h5>
+                        <p class="card-text text-muted">
+                            Monitoreo continuo de tu ritmo cardíaco en tiempo real
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-universal-access text-success" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3">Contador de Pasos</h5>
+                        <p class="card-text text-muted">
+                            Seguimiento de tus pasos diarios y actividad física
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-lungs text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3">Saturación de Oxígeno</h5>
+                        <p class="card-text text-muted">
+                            Medición de SpO2 para monitorear tu nivel de oxígeno
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-thermometer-half text-warning" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3">Temperatura Corporal</h5>
+                        <p class="card-text text-muted">
+                            Control de temperatura corporal durante el ejercicio
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-info-circle-fill text-primary"></i> Sobre el Proyecto
+                </h5>
+                <p class="card-text">
+                    FitTracker IoT es un sistema de monitoreo de actividad física que simula un dispositivo wearable 
+                    (smartwatch/pulsera fitness) basado en ESP32. Los datos biométricos se capturan en tiempo real, 
+                    se almacenan en MongoDB Atlas y se visualizan mediante un dashboard interactivo.
+                </p>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="bi bi-cpu text-primary" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0"><strong>ESP32</strong></p>
+                        <small class="text-muted">Microcontrolador</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="bi bi-database text-success" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0"><strong>MongoDB</strong></p>
+                        <small class="text-muted">Base de datos</small>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="bi bi-graph-up text-warning" style="font-size: 2rem;"></i>
+                        <p class="mt-2 mb-0"><strong>Tiempo Real</strong></p>
+                        <small class="text-muted">Visualización</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefits -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-stars text-warning"></i> Beneficios del Monitoreo
+                </h5>
+                <ul class="list-unstyled mt-3">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success"></i> 
+                        Seguimiento de tu salud cardiovascular
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success"></i> 
+                        Control de tus metas diarias de actividad
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success"></i> 
+                        Alertas sobre niveles anormales de oxígeno
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success"></i> 
+                        Historial completo de tus métricas de salud
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

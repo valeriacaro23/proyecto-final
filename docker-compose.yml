@@ -1,0 +1,21 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - "./src:/app/src"
+      - "./app.py:/app/app.py"
+    environment:
+      - MONGO_URI=mongodb+srv://Valeria_caro:Vale1221@cluster0.yqrqc4k.mongodb.net/fitness_tracker_db?retryWrites=true&w=majority&appName=Cluster0
+      - FLASK_ENV=development
+      - FLASK_DEBUG=True
+      - DEVICE_INTERVAL=5
+    networks:
+     - app-networks
+
+networks:
+  app-networks:
+    driver: bridge

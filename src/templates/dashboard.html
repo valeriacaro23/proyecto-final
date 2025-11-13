@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FitTracker IoT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .live-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background-color: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+        margin-right: 0.5rem;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 1rem;
+    }
+
+    .last-update {
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .hr-zone-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .progress-circle {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.5s ease;
+    }
+
+    .steps-goal {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-0">
+                    <span class="live-indicator"></span>
+                    Monitoreo en Tiempo Real
+                </h3>
+                <p class="last-update mb-0" id="lastUpdate">
+                    Última actualización: <span id="updateTime">Cargando...</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de métricas principales -->
+<div class="row g-4 mb-4">
+    <!-- Frecuencia Cardíaca -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card metric-card">
+            <div class="metric-icon text-danger">
+                <i class="bi bi-heart-pulse-fill"></i>
+            </div>
+            <div class="metric-value text-danger" id="frecuencia">--</div>
+            <div class="metric-label">Frecuencia Cardíaca</div>
+            <div id="hr-zone-badge"></div>
+        </div>
+    </div>
+
+    <!-- Pasos -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card metric-card">
+            <div class="progress-circle">
+                <svg class="progress-ring" width="120" height="120">
+                    <circle
+                        class="progress-ring-circle"
+                        stroke="#e5e7eb"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"
+                    />
+                    <circle
+                        id="steps-progress"
+                        class="progress-ring-circle"
+                        stroke="#10b981"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"
+                        stroke-dasharray="326.73"
+                        stroke-dashoffset="326.73"
+                        stroke-linecap="round"
+                    />
+                </svg>
+                <div class="steps-goal">
+                    <div class="metric-value text-success" id="pasos" style="font-size: 1.5rem;">--</div>
+                    <small class="text-muted">/ 10,000</small>
+                </div>
+            </div>
+            <div class="metric-label mt-2">Pasos</div>
+        </div>
+    </div>
+
+    <!-- Oxígeno -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card metric-card">
+            <div class="metric-icon text-primary">
+                <i class="bi bi-lungs-fill"></i>
+            </div>
+            <div class="metric-value text-primary" id="oxigeno">--</div>
+            <div class="metric-label">Saturación O₂</div>
+            <div id="oxigeno-status" class="mt-2"></div>
+        </div>
+    </div>
+
+    <!-- Temperatura -->
+    <div class="col-lg-3 col-md-6">
+        <div class="card metric-card">
+            <div class="metric-icon text-warning">
+                <i class="bi bi-thermometer-half"></i>
+            </div>
+            <div class="metric-value text-warning" id="temperatura">--</div>
+            <div class="metric-label">Temperatura Corporal</div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficas -->
+<div class="row g-4 mb-4">
+    <!-- Gráfica de Frecuencia Cardíaca -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-graph-up text-danger"></i> Frecuencia Cardíaca
+                </h5>
+                <div class="chart-container">
+                    <canvas id="hrChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfica de Oxígeno -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-graph-up text-primary"></i> Saturación de Oxígeno
+                </h5>
+                <div class="chart-container">
+                    <canvas id="spo2Chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen de actividad -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-activity"></i> Resumen de Actividad
+                </h5>
+                <div class="row mt-3">
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-calendar-day text-primary" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2 mb-0" id="total-pasos">0</h3>
+                        <small class="text-muted">Pasos hoy</small>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-fire text-danger" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2 mb-0" id="calorias">0</h3>
+                        <small class="text-muted">Calorías estimadas</small>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <i class="bi bi-signpost text-success" style="font-size: 2rem;"></i>
+                        <h3 class="mt-2 mb-0" id="distancia">0</h3>
+                        <small class="text-muted">Kilómetros</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-hdd-network"></i> Estado del Dispositivo
+                </h5>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Conexión:</span>
+                        <span class="badge bg-success" id="deviceStatus">
+                            <i class="bi bi-check-circle"></i> Conectado
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Batería:</span>
+                        <span class="badge bg-primary">
+                            <i class="bi bi-battery-full"></i> 85%
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Sincronización:</span>
+                        <span class="badge bg-info">
+                            <i class="bi bi-arrow-repeat"></i> Activa
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuración de gráficas
+    let hrChart, spo2Chart;
+    const maxDataPoints = 20;
+    const STEPS_GOAL = 10000;
+
+    // Inicializar gráficas
+    function initCharts() {
+        const hrCtx = document.getElementById('hrChart').getContext('2d');
+        const spo2Ctx = document.getElementById('spo2Chart').getContext('2d');
+
+        hrChart = new Chart(hrCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Frecuencia Cardíaca (bpm)',
+                    data: [],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50,
+                        max: 200
+                    }
+                }
+            }
+        });
+
+        spo2Chart = new Chart(spo2Ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Saturación O₂ (%)',
+                    data: [],
+                    borderColor: 'rgb(37, 99, 235)',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 90,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // Función para determinar zona de FC
+    function getHeartRateZone(hr) {
+        if (hr < 60) return { name: 'Reposo', color: '#6b7280', class: 'secondary' };
+        if (hr < 100) return { name: 'Ligera', color: '#10b981', class: 'success' };
+        if (hr < 140) return { name: 'Moderada', color: '#f59e0b', class: 'warning' };
+        if (hr < 170) return { name: 'Intensa', color: '#ef4444', class: 'danger' };
+        return { name: 'Máxima', color: '#dc2626', class: 'danger' };
+    }
+
+    // Actualizar progreso de pasos
+    function updateStepsProgress(steps) {
+        const progress = Math.min((steps / STEPS_GOAL) * 100, 100);
+        const circumference = 2 * Math.PI * 52;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        const circle = document.getElementById('steps-progress');
+        circle.style.strokeDashoffset = offset;
+    }
+
+    // Calcular calorías (aproximación: 0.04 calorías por paso)
+    function calculateCalories(steps) {
+        return Math.round(steps * 0.04);
+    }
+
+    // Calcular distancia (aproximación: 0.0008 km por paso)
+    function calculateDistance(steps) {
+        return (steps * 0.0008).toFixed(2);
+    }
+
+    // Actualizar datos biométricos
+    async function updateBiometricData() {
+        try {
+            const response = await fetch('/api/biometrics/latest');
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Frecuencia Cardíaca
+                if (data.frecuencia_cardiaca) {
+                    const hr = data.frecuencia_cardiaca;
+                    document.getElementById('frecuencia').textContent = `${hr} bpm`;
+                    
+                    const zone = getHeartRateZone(hr);
+                    document.getElementById('hr-zone-badge').innerHTML = 
+                        `<div class="hr-zone-badge bg-${zone.class} text-white">${zone.name}</div>`;
+                }
+                
+                // Pasos
+                if (data.pasos !== undefined) {
+                    document.getElementById('pasos').textContent = data.pasos.toLocaleString();
+                    document.getElementById('total-pasos').textContent = data.pasos.toLocaleString();
+                    updateStepsProgress(data.pasos);
+                    
+                    // Actualizar calorías y distancia
+                    document.getElementById('calorias').textContent = calculateCalories(data.pasos);
+                    document.getElementById('distancia').textContent = calculateDistance(data.pasos);
+                }
+                
+                // Oxígeno
+                if (data.oxigeno) {
+                    const spo2 = data.oxigeno;
+                    document.getElementById('oxigeno').textContent = `${spo2.toFixed(1)}%`;
+                    
+                    let statusHtml = '';
+                    if (spo2 >= 95) {
+                        statusHtml = '<small class="text-success"><i class="bi bi-check-circle-fill"></i> Normal</small>';
+                    } else if (spo2 >= 90) {
+                        statusHtml = '<small class="text-warning"><i class="bi bi-exclamation-triangle-fill"></i> Bajo</small>';
+                    } else {
+                        statusHtml = '<small class="text-danger"><i class="bi bi-x-circle-fill"></i> Crítico</small>';
+                    }
+                    document.getElementById('oxigeno-status').innerHTML = statusHtml;
+                }
+                
+                // Temperatura
+                if (data.temperatura) {
+                    document.getElementById('temperatura').textContent = `${data.temperatura.toFixed(1)}°C`;
+                }
+                
+                // Actualizar timestamp
+                if (data.timestamp) {
+                    const date = new Date(data.timestamp);
+                    document.getElementById('updateTime').textContent = date.toLocaleString('es-ES');
+                }
+                
+                document.getElementById('deviceStatus').innerHTML = '<i class="bi bi-check-circle"></i> Conectado';
+                document.getElementById('deviceStatus').className = 'badge bg-success';
+            } else {
+                document.getElementById('deviceStatus').innerHTML = '<i class="bi bi-exclamation-circle"></i> Sin datos';
+                document.getElementById('deviceStatus').className = 'badge bg-warning';
+            }
+        } catch (error) {
+            console.error('Error al obtener datos:', error);
+            document.getElementById('deviceStatus').innerHTML = '<i class="bi bi-x-circle"></i> Error de conexión';
+            document.getElementById('deviceStatus').className = 'badge bg-danger';
+        }
+    }
+
+    // Actualizar gráficas con histórico
+    async function updateCharts() {
+        try {
+            const response = await fetch('/api/biometrics/history');
+            
+            if (response.ok) {
+                const history = await response.json();
+                
+                // Invertir para mostrar del más antiguo al más reciente
+                history.reverse();
+                
+                // Limitar a los últimos N puntos
+                const limitedHistory = history.slice(-maxDataPoints);
+                
+                // Preparar datos
+                const labels = limitedHistory.map(item => {
+                    const date = new Date(item.timestamp);
+                    return date.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+                });
+                
+                const hrData = limitedHistory.map(item => item.frecuencia_cardiaca);
+                const spo2Data = limitedHistory.map(item => item.oxigeno);
+                
+                // Actualizar gráficas
+                hrChart.data.labels = labels;
+                hrChart.data.datasets[0].data = hrData;
+                hrChart.update('none');
+                
+                spo2Chart.data.labels = labels;
+                spo2Chart.data.datasets[0].data = spo2Data;
+                spo2Chart.update('none');
+            }
+        } catch (error) {
+            console.error('Error al obtener histórico:', error);
+        }
+    }
+
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        initCharts();
+        updateBiometricData();
+        updateCharts();
+        
+        // Actualizar cada 5 segundos
+        setInterval(() => {
+            updateBiometricData();
+            updateCharts();
+        }, 5000);
+    });
+</script>
+{% endblock %}

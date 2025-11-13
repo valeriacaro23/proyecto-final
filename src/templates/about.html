@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Acerca de - FitTracker IoT{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i class="bi bi-info-circle-fill text-primary"></i> Sobre FitTracker IoT
+                </h2>
+                
+                <p class="lead">
+                    Sistema de monitoreo de actividad física que simula un dispositivo wearable inteligente 
+                    (smartwatch/pulsera fitness) utilizando tecnología ESP32 y almacenamiento en la nube.
+                </p>
+
+                <hr class="my-4">
+
+                <h4 class="mb-3"><i class="bi bi-gear"></i> Tecnologías Utilizadas</h4>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-code-square text-primary" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">Flask (Python)</h6>
+                                <small class="text-muted">Framework web backend</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-database text-success" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">MongoDB Atlas</h6>
+                                <small class="text-muted">Base de datos NoSQL en la nube</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-bootstrap text-purple" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">Bootstrap 5</h6>
+                                <small class="text-muted">Framework CSS para diseño responsive</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-diagram-3 text-warning" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">Docker</h6>
+                                <small class="text-muted">Containerización de aplicaciones</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-graph-up text-danger" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">Chart.js</h6>
+                                <small class="text-muted">Visualización de datos en tiempo real</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-cpu text-info" style="font-size: 2rem; margin-right: 1rem;"></i>
+                            <div>
+                                <h6 class="mb-0">ESP32</h6>
+                                <small class="text-muted">Microcontrolador IoT (simulado)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h4 class="mb-3"><i class="bi bi-heart-pulse"></i> Sensores Biométricos Implementados</h4>
+                
+                <div class="list-group mb-4">
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-heart-pulse-fill text-danger"></i> Sensor de Frecuencia Cardíaca
+                            </h6>
+                            <small class="text-muted">Tipo: Óptico (PPG)</small>
+                        </div>
+                        <p class="mb-1">Monitoreo continuo del ritmo cardíaco mediante fotopletismografía.</p>
+                        <small><strong>Rango:</strong> 60-180 bpm | <strong>Zonas:</strong> Reposo, Ligera, Moderada, Intensa, Máxima</small>
+                    </div>
+                    
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-universal-access text-success"></i> Contador de Pasos
+                            </h6>
+                            <small class="text-muted">Tipo: Acelerómetro</small>
+                        </div>
+                        <p class="mb-1">Detección de pasos mediante análisis de movimiento triaxial.</p>
+                        <small><strong>Meta diaria:</strong> 10,000 pasos | <strong>Precisión:</strong> ±2%</small>
+                    </div>
+                    
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-lungs-fill text-primary"></i> Oxímetro de Pulso (SpO₂)
+                            </h6>
+                            <small class="text-muted">Tipo: Espectroscopia</small>
+                        </div>
+                        <p class="mb-1">Medición no invasiva de saturación de oxígeno en sangre.</p>
+                        <small><strong>Rango normal:</strong> 95-100% | <strong>Alerta:</strong> < 90%</small>
+                    </div>
+                    
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <i class="bi bi-thermometer-half text-warning"></i> Sensor de Temperatura Corporal
+                            </h6>
+                            <small class="text-muted">Tipo: Termistor NTC</small>
+                        </div>
+                        <p class="mb-1">Monitoreo de temperatura de piel durante la actividad física.</p>
+                        <small><strong>Rango normal:</strong> 36.1-37.5°C | <strong>Precisión:</strong> ±0.1°C</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h4 class="mb-3"><i class="bi bi-list-check"></i> Características del Sistema</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Monitoreo en tiempo real
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Gráficas históricas interactivas
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Zonas de entrenamiento cardíaco
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Contador de calorías estimadas
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Cálculo de distancia recorrida
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                API REST para integraciones
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Diseño responsive (móvil/tablet/desktop)
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Almacenamiento en la nube
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Alertas de niveles anormales
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Fácil migración a hardware real
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h4 class="mb-3"><i class="bi bi-diagram-3"></i> Arquitectura del Sistema</h4>
+                
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <i class="bi bi-smartwatch text-primary" style="font-size: 3rem;"></i>
+                                <h6 class="mt-2">Dispositivo ESP32</h6>
+                                <small class="text-muted">Captura de sensores</small>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-arrow-right" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <i class="bi bi-hdd-network text-success" style="font-size: 3rem;"></i>
+                                <h6 class="mt-2">Servidor Flask</h6>
+                                <small class="text-muted">Procesamiento de datos</small>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-arrow-right" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <i class="bi bi-database text-warning" style="font-size: 3rem;"></i>
+                                <h6 class="mt-2">MongoDB Atlas</h6>
+                                <small class="text-muted">Almacenamiento</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-lightbulb-fill"></i> Aplicaciones Prácticas
+                    </h5>
+                    <ul class="mb-0">
+                        <li><strong>Deportistas:</strong> Monitoreo de rendimiento y zonas de entrenamiento</li>
+                        <li><strong>Salud preventiva:</strong> Detección temprana de anomalías cardiovasculares</li>
+                        <li><strong>Rehabilitación:</strong> Seguimiento de progreso en terapias físicas</li>
+                        <li><strong>Investigación:</strong> Recolección de datos biométricos para estudios</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-success">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-rocket-takeoff"></i> Migración a Hardware Real
+                    </h5>
+                    <p class="mb-0">
+                        Este proyecto está diseñado para facilitar la implementación con hardware real. 
+                        Componentes necesarios: <strong>ESP32</strong>, sensor <strong>MAX30102</strong> (FC + SpO₂), 
+                        <strong>MPU6050</strong> (acelerómetro), y sensor <strong>MLX90614</strong> (temperatura IR).
+                    </p>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <h5><i class="bi bi-github"></i> Proyecto Open Source</h5>
+                    <p class="text-muted">Desarrollado con fines educativos - IoT & Salud Digital</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
