@@ -1,137 +1,161 @@
 import os
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
+from datetime import datetime
+
 from src.config import config
 from src.services.fitness_simulator import FitnessSimulator
 
-def create_app(config_name='default'):
-    """Factory para crear la aplicación Flask"""
-    
-    # Crear instancia de Flask
-    app = Flask(__name__, 
-                template_folder='src/templates',
-                static_folder='src/static')
-    
-    # Cargar configuración
-    app.config.from_object(config[config_name])
-    config[config_name].init_app(app)
-    
-    # Inicializar MongoDB
+
+def create_app(config_name="default"):
+
+    app = Flask(
+        __name__,
+        template_folder="src/templates",
+        static_folder="src/static"
+    )
+
+    # -------------------------------
+    # CARGAR CONFIGURACIÓN
+    # -------------------------------
+    app_config_class = config[config_name]
+    app_config = app_config_class()
+    app.config.from_object(app_config)
+    app.config["APP_CONFIG"] = app_config
+
+    # -------------------------------
+    # CONECTAR A MONGO
+    # -------------------------------
     try:
-        client = MongoClient(app.config['MONGO_URI'])
+        client = MongoClient(
+            app.config["MONGO_URI"],
+            server_api=ServerApi("1"),
+            tlsAllowInvalidCertificates=True
+        )
+        client.admin.command("ping")
+
         app.db = client.get_database()
-        print("✅ Conexión exitosa a MongoDB")
+        print("✅ Conexión exitosa a MongoDB Atlas")
+
+        # INICIAR SIMULADOR BIOMÉTRICO
+        app.simulator = FitnessSimulator(app.db, app_config)
+        app.simulator.start()
+        print("🏃 Simulador de fitness tracker iniciado")
+
     except Exception as e:
         print(f"❌ Error conectando a MongoDB: {e}")
         app.db = None
-    
-    # Rutas
-    @app.route('/')
+        app.simulator = None
+
+    # ==========================================
+    #                RUTAS WEB
+    # ==========================================
+
+    @app.route("/")
     def index():
-        """Página principal"""
-        return render_template('index.html')
-    
-    @app.route('/dashboard')
+        return render_template("index.html")
+
+    @app.route("/dashboard")
     def dashboard():
-        """Dashboard con datos de actividad física"""
-        return render_template('dashboard.html')
-    
-    @app.route('/api/biometrics/latest')
-    def get_latest_biometrics():
-        """API: Obtener últimas lecturas biométricas"""
-        if app.db is None:
-            return jsonify({'error': 'Database not connected'}), 500
-        
-        try:
-            # Obtener última lectura
-            latest_data = list(app.db.biometric_readings.find().sort('timestamp', -1).limit(1))
-            
-            if latest_data:
-                # Convertir ObjectId a string para JSON
-                latest_data[0]['_id'] = str(latest_data[0]['_id'])
-                return jsonify(latest_data[0])
-            else:
-                return jsonify({'message': 'No data available'}), 404
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    @app.route('/api/biometrics/history')
-    def get_biometrics_history():
-        """API: Obtener histórico de lecturas (últimas 50)"""
-        if app.db is None:
-            return jsonify({'error': 'Database not connected'}), 500
-        
-        try:
-            history = list(app.db.biometric_readings.find().sort('timestamp', -1).limit(50))
-            
-            # Convertir ObjectId a string
-            for reading in history:
-                reading['_id'] = str(reading['_id'])
-            
-            return jsonify(history)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    @app.route('/api/steps/total')
-    def get_total_steps():
-        """API: Obtener total de pasos del día"""
-        if app.db is None:
-            return jsonify({'error': 'Database not connected'}), 500
-        
-        try:
-            # Obtener la última lectura que contiene el total acumulado
-            latest = app.db.biometric_readings.find_one(sort=[('timestamp', -1)])
-            
-            if latest and 'pasos' in latest:
-                return jsonify({'total_steps': latest['pasos']})
-            else:
-                return jsonify({'total_steps': 0})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    @app.route('/api/heart_rate/zone')
-    def get_heart_rate_zone():
-        """API: Obtener zona de frecuencia cardíaca actual"""
-        if app.db is None:
-            return jsonify({'error': 'Database not connected'}), 500
-        
-        try:
-            latest = app.db.biometric_readings.find_one(sort=[('timestamp', -1)])
-            
-            if latest and 'frecuencia_cardiaca' in latest:
-                hr = latest['frecuencia_cardiaca']
-                zone = 'reposo'
-                
-                # Determinar zona
-                for zone_name, zone_data in app.config['HEART_RATE_ZONES'].items():
-                    if zone_data['min'] <= hr < zone_data['max']:
-                        zone = zone_name
-                        break
-                
-                return jsonify({
-                    'heart_rate': hr,
-                    'zone': zone,
-                    'color': app.config['HEART_RATE_ZONES'][zone]['color']
-                })
-            else:
-                return jsonify({'message': 'No data available'}), 404
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    @app.route('/about')
+        return render_template("dashboard.html")
+
+    @app.route("/metrics")
+    def metrics():
+        return render_template("metrics.html")
+
+    @app.route("/about")
     def about():
-        """Página sobre el proyecto"""
-        return render_template('about.html')
-    
+        return render_template("about.html")
+
+    # ==========================================
+    #         API BIOMÉTRICOS (TU SIMULADOR)
+    # ==========================================
+
+    @app.route("/api/biometrics/latest")
+    def api_latest():
+        latest = app.db.biometric_readings.find_one(sort=[("timestamp", -1)])
+        if not latest:
+            return jsonify({"message": "No data available"}), 404
+
+        latest["_id"] = str(latest["_id"])
+        return jsonify(latest)
+
+    @app.route("/api/biometrics/history")
+    def api_history():
+        history = list(app.db.biometric_readings.find().sort("timestamp", -1).limit(50))
+        for h in history:
+            h["_id"] = str(h["_id"])
+        return jsonify(history)
+
+    @app.route("/api/steps/total")
+    def api_steps():
+        latest = app.db.biometric_readings.find_one(sort=[("timestamp", -1)])
+        return jsonify({"total_steps": latest.get("pasos", 0) if latest else 0})
+
+    @app.route("/api/heart_rate/zone")
+    def api_zone():
+        latest = app.db.biometric_readings.find_one(sort=[("timestamp", -1)])
+        if not latest:
+            return jsonify({"message": "No data available"}), 404
+
+        hr = latest["frecuencia_cardiaca"]
+        zones = app_config.HEART_RATE_ZONES
+
+        zone = next(
+            (name for name, z in zones.items() if z["min"] <= hr < z["max"]),
+            "reposo"
+        )
+
+        return jsonify({
+            "heart_rate": hr,
+            "zone": zone,
+            "color": zones[zone]["color"]
+        })
+
+    @app.route("/api/simulator/status")
+    def api_sim_status():
+        return jsonify(app.simulator.get_status())
+
+    @app.route("/api/simulator/reset-steps", methods=["POST"])
+    def api_reset():
+        app.simulator.reset_steps()
+        return jsonify({"message": "Steps reset successfully", "total_steps": 0})
+
+    # ==========================================
+    #              API SENSOR EXTERNO
+    # ==========================================
+
+    @app.route("/api/sensor/proximidad", methods=["POST"])
+    def api_sensor_proximidad():
+        """Recibe datos enviados desde sensor_simulado.py"""
+
+        data = request.json
+
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+
+        try:
+            app.db.sensor_data.insert_one({
+                "sensor_id": data.get("sensor_id"),
+                "distancia_cm": data.get("distancia_cm"),
+                "timestamp": datetime.utcnow()
+            })
+
+            print(f"📩 Dato recibido y guardado: {data}")
+
+            return jsonify({"status": "ok", "received": data}), 200
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     return app
 
 
-if __name__ == '__main__':
-    # Determinar el entorno
-    env = os.getenv('FLASK_ENV', 'development')
-    
-    # Crear aplicación
+# ==========================================
+# EJECUTAR APP
+# ==========================================
+if __name__ == "__main__":
+    env = os.getenv("FLASK_ENV", "development")
     app = create_app(env)
-    
-    # Ejecutar servidor
-    app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
+    app.run(host="0.0.0.0", port=5000, debug=app.config["DEBUG"])

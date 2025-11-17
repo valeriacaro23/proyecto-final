@@ -3,19 +3,71 @@ services:
     build:
       context: .
       dockerfile: dockerfile
+    container_name: web
     ports:
       - "5000:5000"
     volumes:
       - "./src:/app/src"
       - "./app.py:/app/app.py"
     environment:
-      - MONGO_URI=mongodb+srv://Valeria_caro:Vale1221@cluster0.yqrqc4k.mongodb.net/fitness_tracker_db?retryWrites=true&w=majority&appName=Cluster0
+      - MONGO_URI=mongodb://mongo:27017/fitness_tracker_db
       - FLASK_ENV=development
       - FLASK_DEBUG=True
       - DEVICE_INTERVAL=5
     networks:
-     - app-networks
+      - app-networks
+    depends_on:
+      - mongo
+    command: python /app/app.py
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-networks
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    networks:
+      - app-networks
+    depends_on:
+      - mongo
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-networks
+    depends_on:
+      - web
 
 networks:
   app-networks:
     driver: bridge
+
+volumes:
+  mongo-data:
+  grafana-data:

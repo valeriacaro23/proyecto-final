@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Métricas Avanzadas - FitTracker IoT{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grafana-container {
+        width: 100%;
+        height: 800px;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .grafana-card {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .metrics-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+
+    .instruction-card {
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .quick-links {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .quick-link-btn {
+        flex: 1;
+        min-width: 200px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="metrics-header">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="bi bi-graph-up-arrow"></i> Métricas Avanzadas
+            </h1>
+            <p class="lead mb-0">
+                Visualización avanzada de datos biométricos con Grafana
+            </p>
+        </div>
+
+        <!-- Instrucciones de configuración -->
+        <div class="instruction-card">
+            <h5 class="mb-3">
+                <i class="bi bi-info-circle-fill text-primary"></i> 
+                Configuración inicial de Grafana
+            </h5>
+            <ol class="mb-3">
+                <li class="mb-2">
+                    <strong>Acceder a Grafana:</strong> 
+                    <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>
+                </li>
+                <li class="mb-2">
+                    <strong>Credenciales:</strong> Usuario: <code>admin</code> / Contraseña: <code>admin123</code>
+                </li>
+                <li class="mb-2">
+                    <strong>Agregar Data Source:</strong> MongoDB (usando plugin MongoDB)
+                </li>
+                <li class="mb-2">
+                    <strong>Crear Dashboard:</strong> Configura visualizaciones personalizadas
+                </li>
+                <li class="mb-2">
+                    <strong>Copiar URL del panel:</strong> Share → Embed → Copiar URL del iframe
+                </li>
+            </ol>
+
+            <div class="quick-links">
+                <a href="http://localhost:3000" target="_blank" class="btn btn-primary quick-link-btn">
+                    <i class="bi bi-box-arrow-up-right"></i> Abrir Grafana
+                </a>
+                <a href="http://localhost:3000/datasources" target="_blank" class="btn btn-success quick-link-btn">
+                    <i class="bi bi-database"></i> Configurar Data Source
+                </a>
+                <a href="http://localhost:3000/dashboard/new" target="_blank" class="btn btn-info quick-link-btn">
+                    <i class="bi bi-plus-circle"></i> Crear Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Grafana Embed -->
+        <div class="card grafana-card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Dashboard de Grafana
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <iframe 
+                    src="http://localhost:3000/d-solo/your-dashboard-id/your-dashboard-name?orgId=1&refresh=5s&theme=light"
+                    class="grafana-container"
+                    frameborder="0"
+                ></iframe>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-lightbulb text-warning"></i> Ventajas de Grafana
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Visualizaciones avanzadas personalizables
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Alertas en tiempo real
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Múltiples tipos de gráficas
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Análisis histórico avanzado
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                Exportación de dashboards
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-gear text-primary"></i> Configuración recomendada
+                        </h5>
+                        <div class="alert alert-info mb-3">
+                            <strong>Plugin necesario:</strong> Grafana MongoDB Plugin
+                        </div>
+                        <p><strong>Pasos para conectar MongoDB:</strong></p>
+                        <ol class="small">
+                            <li>Instalar plugin MongoDB en Grafana</li>
+                            <li>Configuration → Data sources → Add data source</li>
+                            <li>Buscar "MongoDB"</li>
+                            <li>Configurar con tu URI de Atlas</li>
+                            <li>Database: <code>fitness_tracker_db</code></li>
+                            <li>Collection: <code>biometric_readings</code></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Métricas sugeridas -->
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-line"></i> Métricas sugeridas para visualizar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6 class="text-danger">
+                            <i class="bi bi-heart-pulse"></i> Frecuencia Cardíaca
+                        </h6>
+                        <ul class="small">
+                            <li>Promedio por hora</li>
+                            <li>FC máxima/mínima</li>
+                            <li>Tiempo en zonas</li>
+                            <li>Variabilidad (HRV)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-success">
+                            <i class="bi bi-universal-access"></i> Actividad
+                        </h6>
+                        <ul class="small">
+                            <li>Pasos totales</li>
+                            <li>Calorías quemadas</li>
+                            <li>Distancia recorrida</li>
+                            <li>Pasos por hora</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-primary">
+                            <i class="bi bi-lungs"></i> Oxigenación
+                        </h6>
+                        <ul class="small">
+                            <li>SpO2 promedio</li>
+                            <li>Episodios bajo 95%</li>
+                            <li>Tendencias diarias</li>
+                            <li>Correlación con FC</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6 class="text-warning">
+                            <i class="bi bi-thermometer"></i> Temperatura
+                        </h6>
+                        <ul class="small">
+                            <li>Temperatura media</li>
+                            <li>Variaciones por actividad</li>
+                            <li>Alertas de fiebre</li>
+                            <li>Patrones diurnos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh del iframe cada 30 segundos
+    setInterval(function() {
+        const iframe = document.querySelector('.grafana-container');
+        if (iframe) {
+            iframe.src = iframe.src;
+        }
+    }, 30000);
+
+    // Mensaje de bienvenida
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📊 Página de métricas cargada');
+        console.log('🔗 Grafana disponible en: http://localhost:3000');
+    });
+</script>
+{% endblock %}
